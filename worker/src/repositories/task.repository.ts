@@ -1,3 +1,4 @@
+import {TaskID} from "../types/task.js";
 import * as type from '../types/task.js';
 import {postgres} from "../postgres.js";
 
@@ -13,7 +14,8 @@ export const TaskRepository = {
 
     return response.rows[0] as type.Task;
   },
-  async update(id: Pick<type.Task, 'id'>, data: type.UpdateTaskDTO) {
+
+  async update(id: TaskID, data: type.UpdateTaskDTO) {
     const fields = [];
     const values = [];
     let index = 1;
@@ -24,7 +26,7 @@ export const TaskRepository = {
       index++;
     }
 
-    values.push(id.id);
+    values.push(id);
 
     const response = await postgres.query(`
       UPDATE ${TABLE_NAME}
@@ -34,6 +36,7 @@ export const TaskRepository = {
 
     return response.rows[0] as type.Task;
   },
+
   async delete(id: type.TaskID) {
     await postgres.query(`
       DELETE
