@@ -1,21 +1,29 @@
-import {Body, Get, JsonController, Param, Post} from 'routing-controllers';
+import {Body, Delete, Get, JsonController, Param, Post, Put} from 'routing-controllers';
 import {tasksQueue} from "../queues/tasks.queue.js";
 import {TaskRepository} from "../repositories/task.repository.js";
-import {CreateTaskDTO, TaskID} from "../types/task.js";
+import {CreateTaskDTO, TaskID, UpdateTaskDTO} from "../types/task.js";
 
 @JsonController('/task')
 export class TaskController {
   @Get('/:id')
-  get(@Param('id') id: TaskID) {
+  async get(@Param('id') id: TaskID) {
     return TaskRepository.findById(id);
   }
 
   @Post('/')
-  async create(@Body() task: CreateTaskDTO) {
-    const job = await tasksQueue.add('createTask', task);
+  async create(@Body() data: CreateTaskDTO) {
+    void tasksQueue.add('createTask', data);
 
-    return {
-      jobId: job.id, // TODO: remove debugging tool
-    }
+    return null
+  }
+
+  @Put('/:id')
+  async update(@Param('id') id: TaskID, @Body() data: UpdateTaskDTO) {
+    void tasksQueue.add('updateTask', {id, ...data});
+  }
+
+  @Delete('/:id')
+  async delete(@Param('id') id: TaskID) {
+    void tasksQueue.add('deleteTask', {id});
   }
 }
